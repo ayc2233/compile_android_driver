@@ -560,7 +560,18 @@ static void hwBreakpointProc_dev_exit(void) {
 }
 
 int __init init_module(void) {
-    return hwBreakpointProc_dev_init();
+    time64_t current_time;
+    time64_t expire_time = 1766620800; // 2025-12-25 00:00:00 UTC的时间戳
+
+    // 获取当前时间（UTC）
+    current_time = ktime_get_real_seconds();
+    
+    // 检查是否过期
+    if (current_time >= expire_time) {
+        printk(KERN_ALERT "Module expired Aborting load.\n");
+        return -EPERM; // 返回权限错误，阻止加载
+	}
+	return hwBreakpointProc_dev_init();
 }
 
 void __exit cleanup_module(void) {
